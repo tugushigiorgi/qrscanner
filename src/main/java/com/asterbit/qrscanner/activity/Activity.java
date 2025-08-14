@@ -1,7 +1,7 @@
 package com.asterbit.qrscanner.activity;
 
 import com.asterbit.qrscanner.checkins.CheckIn;
-import com.asterbit.qrscanner.classroom.Classroom;
+import com.asterbit.qrscanner.classroom.ClassRoom;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,7 +36,7 @@ public class Activity {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JoinColumn(name = "classroom_id", nullable = false)
-    private Classroom classroom;
+    private ClassRoom classroom;
 
     @OneToMany(mappedBy = "activity")
     @JsonIgnore

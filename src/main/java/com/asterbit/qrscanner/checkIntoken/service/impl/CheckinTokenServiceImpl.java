@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-import static com.asterbit.qrscanner.ConstMessages.*;
+import static com.asterbit.qrscanner.util.ConstMessages.*;
 import static org.slf4j.helpers.Reporter.info;
 
 @Service

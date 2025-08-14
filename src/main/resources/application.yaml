@@ -17,3 +17,14 @@ spring:
     hibernate:
       ddl-auto: none
     database-platform: orgr.hibernate.dialect.PostgreSQLDialect
+
+activity:
+  time-range:
+    start-offset-minutes: 10
+    end-offset-hours: 6
+
+school:
+  network:
+    allowed-public-ips:
+      - 203.0.113.45
+
