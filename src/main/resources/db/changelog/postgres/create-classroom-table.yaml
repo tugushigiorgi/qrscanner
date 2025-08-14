@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2
+      author: girogi
+      changes:
+        - createTable:
+            tableName: classrooms
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+              - column:
+                  name: location
+                  type: varchar(255)

@@ -1,1 +1,15 @@
-spring.application.name=qrscanner
+spring:
+  liquibase:
+    change-log: classpath:/db/changelog-master.yaml
+    enabled: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/lmsDb
+#    username: ${postgresUser}
+#    password: ${postgresPassword}
+    username: myuser
+    password: mypassword
+    driverClassName: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    database-platform: orgr.hibernate.dialect.PostgreSQLDialect

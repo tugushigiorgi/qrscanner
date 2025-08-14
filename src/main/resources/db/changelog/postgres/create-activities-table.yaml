@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3
+      author: girogi
+      changes:
+        - createTable:
+            tableName: activities
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(255)
+              - column:
+                  name: description
+                  type: varchar(1000)
+              - column:
+                  name: start_time
+                  type: timestamp
+              - column:
+                  name: end_time
+                  type: timestamp
+              - column:
+                  name: classroom_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: activities
+            baseColumnNames: classroom_id
+            constraintName: fk_activities_classroom
+            referencedTableName: classrooms
+            referencedColumnNames: id
+            onDelete: CASCADE
