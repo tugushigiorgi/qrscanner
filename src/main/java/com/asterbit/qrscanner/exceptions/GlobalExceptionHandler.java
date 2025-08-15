@@ -1,0 +1,49 @@
+package com.asterbit.qrscanner.exceptions;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.asterbit.qrscanner.util.ConstMessages.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+@RestControllerAdvice
+@Slf4j
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatusException(ResponseStatusException ex) {
+        log.error(ex.getMessage());
+        var body = body(ex.getStatusCode().value(), ex.getMessage());
+        return new ResponseEntity<>(body, ex.getStatusCode());
+    }
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidTokenException(InvalidTokenException ex) {
+        log.error(ex.getMessage());
+        var body = body(BAD_REQUEST.value(), ex.getMessage());
+        return new ResponseEntity<>(body, BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+        log.error(ex.getMessage());
+        var body = body(INTERNAL_SERVER_ERROR.value(), ex.getMessage());
+        return new ResponseEntity<>(body, INTERNAL_SERVER_ERROR);
+    }
+
+    private Map<String, Object> body(int status, String message) {
+        Map<String, Object> body = new HashMap<>();
+        body.put(TIMESTAMP, LocalDateTime.now());
+        body.put(STATUS, status);
+        body.put(EX_ERROR, message);
+        return body;
+    }
+
+}

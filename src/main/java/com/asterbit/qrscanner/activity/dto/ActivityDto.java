@@ -3,6 +3,7 @@ package com.asterbit.qrscanner.activity.dto;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -10,6 +11,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ActivityDto {
+
+    private UUID id;
+
     private String title;
 
     private LocalDateTime startTime;

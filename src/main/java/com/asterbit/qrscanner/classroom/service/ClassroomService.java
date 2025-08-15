@@ -1,12 +1,14 @@
 package com.asterbit.qrscanner.classroom.service;
 
-import com.asterbit.qrscanner.activity.dto.ActivityDto;
+import com.asterbit.qrscanner.checkins.dto.CheckinDto;
 import com.asterbit.qrscanner.classroom.dto.CurrentActivitiesDto;
 
 import java.util.UUID;
 
-public interface ClassRoomService {
+public interface ClassroomService {
 
     CurrentActivitiesDto currentActivities(UUID classroomId);
+
+    CheckinDto CheckinStudent(UUID classroomId, UUID activityId);
 
 }

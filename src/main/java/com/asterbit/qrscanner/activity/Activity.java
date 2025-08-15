@@ -1,7 +1,7 @@
 package com.asterbit.qrscanner.activity;
 
 import com.asterbit.qrscanner.checkins.CheckIn;
-import com.asterbit.qrscanner.classroom.ClassRoom;
+import com.asterbit.qrscanner.classroom.Classroom;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,11 +36,17 @@ public class Activity {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JoinColumn(name = "classroom_id", nullable = false)
-    private ClassRoom classroom;
+    private Classroom classroom;
 
-    @OneToMany(mappedBy = "activity")
+    @OneToMany(mappedBy = "activity",cascade = CascadeType.ALL,orphanRemoval = true)
     @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<CheckIn> checkIns = new HashSet<>();
+
+    public void addCheckIn(CheckIn checkIn) {
+        checkIns.add(checkIn);
+        checkIn.setActivity(this);
+    }
+
 }

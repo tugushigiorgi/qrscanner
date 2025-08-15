@@ -8,6 +8,7 @@ import org.mapstruct.*;
 public interface ActivityMapper {
 
     @Mappings({
+            @Mapping(source = "id", target = "id"),
             @Mapping(source = "title", target = "title"),
             @Mapping(source = "startTime", target = "startTime"),
             @Mapping(source = "endTime", target = "endTime"),
