@@ -25,7 +25,6 @@ public class JwtFactory {
     @Value("${jwt.expiration}")
     private int expiration;
 
-
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }

@@ -26,7 +26,6 @@ import static com.asterbit.qrscanner.util.ConstMessages.USER_NOT_FOUND_WITH_EMAI
 @Configuration
 public class SecurityConfig {
 
-    private final JwtFactory jwtFactory;
     private final UserRepository userRepository;
 
     @Bean
@@ -44,8 +43,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)

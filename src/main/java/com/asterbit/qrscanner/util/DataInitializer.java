@@ -39,9 +39,5 @@ public class DataInitializer  implements CommandLineRunner {
         newclassroom.addActivity(activities);
         activities.setClassroom(newclassroom);
         classroomRepository.save(newclassroom);
-
-
-
-
     }
 }
