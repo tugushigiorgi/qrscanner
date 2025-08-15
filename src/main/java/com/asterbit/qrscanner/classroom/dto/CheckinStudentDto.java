@@ -15,8 +15,7 @@ import java.util.UUID;
 public class CheckinStudentDto {
 
 
-    public UUID token;
-
+    public String token;
 
     public UUID  activityId;
 

@@ -4,6 +4,7 @@ import com.asterbit.qrscanner.activity.Activity;
 import com.asterbit.qrscanner.activity.ActivityRepository;
 import com.asterbit.qrscanner.classroom.Classroom;
 import com.asterbit.qrscanner.classroom.ClassroomRepository;
+import com.asterbit.qrscanner.user.User;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,7 @@ public class DataInitializer  implements CommandLineRunner {
                 .startTime(LocalDateTime.now().plusMinutes(10))
                 .endTime(LocalDateTime.now().plusHours(3))
                 .build();
+
 
         var newclassroom = Classroom.builder()
                 .name("New Classroom 1")

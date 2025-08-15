@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.asterbit.qrscanner.util.ConstMessages.*;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
@@ -46,12 +47,11 @@ public class ClassroomServiceImpl implements ClassroomService {
     public CurrentActivitiesDto currentActivities(UUID classroomId) {
         var currentUserId = UUID.randomUUID();
         var classroom = classRoomRepository.findById(classroomId)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND,
-                        String.format(CLASSROOM_NOT_FOUND_WITH_ID, classroomId)));
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND,String.format(CLASSROOM_NOT_FOUND_WITH_ID, classroomId)));
 
         var now = LocalDateTime.now();
         var fromTime = now.minusMinutes(timeRangeProperties.getStartOffsetMinutes());
-        var toTime = now.plusHours(timeRangeProperties.getEndOffsetHours()); // was plusMinutes before
+        var toTime = now.plusHours(timeRangeProperties.getEndOffsetHours());
         var currentActivities = activityRepository.findActivitiesStartingInRange(classroomId, fromTime, toTime);
         if (isEmpty(currentActivities)) {
             throw new ResponseStatusException(NOT_FOUND, String.format(ACTIVITIES_NOT_FOUND, classroomId));
@@ -62,14 +62,13 @@ public class ClassroomServiceImpl implements ClassroomService {
 
         var token = CheckInToken.builder()
                 .classroomId(classroomId)
-                .token(UUID.randomUUID())
                 .userId(currentUserId)
                 .build();
         var newCheckinToken = checkinTokenService.createCheckInToken(token);
 
         return CurrentActivitiesDto.builder()
                 .activities(activitiesDto)
-                .checkInToken(newCheckinToken.getToken())
+                .checkInToken(newCheckinToken.getId())
                 .build();
     }
 
@@ -92,19 +91,15 @@ public class ClassroomServiceImpl implements ClassroomService {
             throw new ResponseStatusException(FORBIDDEN, CHECKIN_NOT_ALLOWED);
         }
         var classroom = currentActivity.getClassroom();
-        if (!tokenValid(dto.getToken(), classroom.getId(), currentUserId)) {
-            throw new InvalidTokenException(String.format(TOKEN_NOT_FOUND, classroom.getId()));
+        if (!isTokenValid(dto.getToken(), classroom.getId(), currentUserId)) {
+            throw new InvalidTokenException(String.format(TOKEN_NOT_FOUND, dto.getToken()));
         }
-
         var newCheckin = CheckIn.builder()
                 .checkInDate(LocalDateTime.now())
                 .build();
         currentUser.addCheckIn(newCheckin);
         currentActivity.addCheckIn(newCheckin);
         var savedCheckin = checkInRepository.save(newCheckin);
-
-
-
         return CheckinActivityDto.builder()
                 .checkedIn(true)
                 .checkinDate(savedCheckin.getCheckInDate())
@@ -115,19 +110,19 @@ public class ClassroomServiceImpl implements ClassroomService {
                 .build();
     }
 
-    private boolean tokenValid(UUID tokenId, UUID classroomId, UUID currentUserId) {
-        return checkInTokenRepository.findByToken(tokenId)
+    private boolean isTokenValid(String tokenId, UUID classroomId, UUID currentUserId) {
+        return checkInTokenRepository.findById(tokenId)
                 .map(token -> {
-                    boolean isValid = token.getClassroomId().equals(classroomId)
-                            && token.getUserId().equals(currentUserId);
-
-                    if (isValid) {
-                        checkInTokenRepository.deleteById(token.getId());
+                    var matchesClassroom = classroomId.equals(token.getClassroomId());
+                    var matchesUser = currentUserId.equals(token.getUserId());
+                    if (matchesClassroom && matchesUser) {
+                        checkInTokenRepository.delete(token);
+                        return true;
                     }
-                    return isValid;
+
+                   return false;
                 })
                 .orElse(false);
     }
-
 
 }

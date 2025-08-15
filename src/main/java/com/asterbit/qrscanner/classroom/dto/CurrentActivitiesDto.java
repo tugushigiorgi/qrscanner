@@ -4,7 +4,6 @@ import com.asterbit.qrscanner.activity.dto.ActivityDto;
 import lombok.*;
 
 import java.util.Set;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -12,6 +11,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CurrentActivitiesDto {
-    private UUID checkInToken;
+    private String checkInToken;
     private Set<ActivityDto> activities;
 }

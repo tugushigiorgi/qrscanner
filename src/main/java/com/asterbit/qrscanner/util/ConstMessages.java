@@ -6,7 +6,7 @@ public final class ConstMessages {
     public static final String CREATING_CHECKIN_TOKEN_BY_ID = "Retrieving checkin token by id %s";
     public static final String DELETING_CHECKIN_TOKEN_BY_ID = "Deleting checkin token by id %s";
     public static final String CLASSROOM_NOT_FOUND_WITH_ID = "Classroom with id %s not found";
-    public static final String ACTIVITIES_NOT_FOUND = "Activities not found/already started  with classroomId %s";
+    public static final String ACTIVITIES_NOT_FOUND = "Activities not found or already started  with classroomId %s";
     public static final String OUTSIDE_SCHOOL_NETWORK = "You are outside the school network";
     public static final String TIMESTAMP = "timestamp";
     public static final String STATUS = "status";
