@@ -3,7 +3,6 @@ package com.asterbit.qrscanner.checkins.dto;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,7 +15,5 @@ public class CheckinDto {
     private LocalDateTime  activityEnd;
     private String  ClassroomLocation;
     private String ClassroomName;
-
-
 
 }

@@ -28,6 +28,6 @@ public class ClassroomController {
     @PostMapping("/{classroomId}/checkin/{activityId}")
     @RequireSchoolWifi
     public ResponseEntity<CheckinDto> checkinStudent(@PathVariable UUID classroomId, @PathVariable UUID activityId) {
-        return ResponseEntity.ok(classRoomService.CheckinStudent(classroomId, activityId));
+        return ResponseEntity.ok(classRoomService.checkinStudent(classroomId, activityId));
     }
 }

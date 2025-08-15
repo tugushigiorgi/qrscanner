@@ -73,7 +73,7 @@ public class ClassroomServiceImpl implements ClassroomService {
 
     @Transactional
     @Override
-    public CheckinDto CheckinStudent(UUID classroomId, UUID activityId) {
+    public CheckinDto checkinStudent(UUID classroomId, UUID activityId) {
         var currentUserId = UUID.fromString(classroomId.toString());
         //TODO
         var currentUser = new User();
@@ -85,9 +85,7 @@ public class ClassroomServiceImpl implements ClassroomService {
             throw new InvalidTokenException(String.format(TOKEN_NOT_FOUND, classroomId));
         }
         var newCheckin = CheckIn.builder()
-                .user(currentUser)
                 .checkInDate(LocalDateTime.now())
-                .activity(currentActivity)
                 .build();
         currentUser.addCheckIn(newCheckin);
         currentActivity.addCheckIn(newCheckin);
@@ -104,7 +102,7 @@ public class ClassroomServiceImpl implements ClassroomService {
 
     private boolean tokenValid(UUID classroomId, UUID userId) {
         return checkInTokenRepository.findByUserId(userId)
-                .map(token -> token.getToken().equals(classroomId))
+                .map(token -> token.getClassroomId().equals(classroomId))
                 .orElse(false);
     }
 

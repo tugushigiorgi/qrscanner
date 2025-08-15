@@ -9,6 +9,6 @@ public interface ClassroomService {
 
     CurrentActivitiesDto currentActivities(UUID classroomId);
 
-    CheckinDto CheckinStudent(UUID classroomId, UUID activityId);
+    CheckinDto checkinStudent(UUID classroomId, UUID activityId);
 
 }
