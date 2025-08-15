@@ -9,8 +9,8 @@ public interface UserMapper {
 
     @Mappings({
             @Mapping(source = "id", target = "id"),
-            @Mapping(source = "name", target = "name"),
-            @Mapping(source = "surname", target = "surname"),
+            @Mapping(source = "lastName", target = "lastName"),
+            @Mapping(source = "firstName", target = "firstName"),
             @Mapping(source = "email", target = "email")})
     @BeanMapping(ignoreByDefault = true)
     UserDto toDto(User entity);

@@ -1,20 +1,47 @@
 databaseChangeLog:
   - changeSet:
       id: 1
-      author: girogi
+      author: asterbit
       changes:
         - createTable:
-            tableName: users
+            tableName: "users"
             columns:
               - column:
-                  name: id
-                  type: uuid
+                  name: "id"
+                  type: "uuid"
                   constraints:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: username
-                  type: varchar(255)
+                  name: "first_name"
+                  type: "varchar(255)"
+                  constraints:
+                    nullable: false
               - column:
-                  name: email
-                  type: varchar(255)
+                  name: "last_name"
+                  type: "varchar(255)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "email"
+                  type: "varchar(255)"
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: "password"
+                  type: "varchar(255)"
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 2
+      author: asterbit
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: "check_ins"
+            baseColumnNames: "user_id"
+            referencedTableName: "users"
+            referencedColumnNames: "id"
+            constraintName: "fk_checkin_user"
+            onDelete: "CASCADE"

@@ -24,7 +24,7 @@ public class DataInitializer  implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         var activities =Activity.builder()
-                .title("Activitie 1")
+                .title("Activitie 3")
                 .description("Activities are used for testing purposes")
                 .startTime(LocalDateTime.now().plusMinutes(10))
                 .endTime(LocalDateTime.now().plusHours(3))
@@ -32,8 +32,8 @@ public class DataInitializer  implements CommandLineRunner {
 
 
         var newclassroom = Classroom.builder()
-                .name("New Classroom 1")
-                .location("New Location 1")
+                .name("New Classroom 3")
+                .location("New Location 3")
                 .activities(new HashSet<>())
                 .build();
         newclassroom.addActivity(activities);

@@ -23,7 +23,7 @@ public class JwtFactory {
     private String secretKey;
 
     @Value("${jwt.expiration}")
-    private Long expiration;
+    private int expiration;
 
 
     public String extractUsername(String token) {
