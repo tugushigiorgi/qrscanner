@@ -12,7 +12,7 @@ public final class ConstMessages {
     public static final String STATUS = "status";
     public static final String EX_ERROR = "error";
     public static final String ACTIVITY_NOT_FOUND = "Activity with id %s not found";
-    public static final String TOKEN_NOT_FOUND = "Token is invalid/not found with id %s";
+    public static final String TOKEN_NOT_FOUND = "Token is invalid";
     public static final String CHECKIN_NOT_ALLOWED = "Check-in not allowed, you can check in 10 minutes before activity starts";
 }
 

@@ -45,9 +45,10 @@ public class ClassroomServiceImpl implements ClassroomService {
     @Transactional
     @Override
     public CurrentActivitiesDto currentActivities(UUID classroomId) {
+     //TO DO
         var currentUserId = UUID.randomUUID();
         var classroom = classRoomRepository.findById(classroomId)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND,String.format(CLASSROOM_NOT_FOUND_WITH_ID, classroomId)));
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, String.format(CLASSROOM_NOT_FOUND_WITH_ID, classroomId)));
 
         var now = LocalDateTime.now();
         var fromTime = now.minusMinutes(timeRangeProperties.getStartOffsetMinutes());
@@ -75,6 +76,7 @@ public class ClassroomServiceImpl implements ClassroomService {
     @Transactional
     @Override
     public CheckinActivityDto checkinStudent(CheckinStudentDto dto) {
+        //TODO
         var currentUserId = UUID.randomUUID();
         var currentUser = User.builder().id(currentUserId)
                 .checkins(new HashSet<>())
@@ -92,7 +94,7 @@ public class ClassroomServiceImpl implements ClassroomService {
         }
         var classroom = currentActivity.getClassroom();
         if (!isTokenValid(dto.getToken(), classroom.getId(), currentUserId)) {
-            throw new InvalidTokenException(String.format(TOKEN_NOT_FOUND, dto.getToken()));
+            throw new InvalidTokenException(TOKEN_NOT_FOUND);
         }
         var newCheckin = CheckIn.builder()
                 .checkInDate(LocalDateTime.now())
@@ -101,7 +103,6 @@ public class ClassroomServiceImpl implements ClassroomService {
         currentActivity.addCheckIn(newCheckin);
         var savedCheckin = checkInRepository.save(newCheckin);
         return CheckinActivityDto.builder()
-                .checkedIn(true)
                 .checkinDate(savedCheckin.getCheckInDate())
                 .activityStart(currentActivity.getStartTime())
                 .activityEnd(currentActivity.getEndTime())
@@ -119,8 +120,7 @@ public class ClassroomServiceImpl implements ClassroomService {
                         checkInTokenRepository.delete(token);
                         return true;
                     }
-
-                   return false;
+                    return false;
                 })
                 .orElse(false);
     }
