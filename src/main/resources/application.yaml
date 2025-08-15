@@ -16,7 +16,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    database-platform: orgr.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 activity:
   time-range:
@@ -26,5 +26,5 @@ activity:
 school:
   network:
     allowed-public-ips:
-      - 203.0.113.45
+#      - 203.0.113.45
 

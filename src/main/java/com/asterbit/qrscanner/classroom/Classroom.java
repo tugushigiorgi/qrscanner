@@ -14,7 +14,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "classroom")
+@Table(name = "classrooms")
 public class Classroom {
 
     @Id
@@ -30,4 +30,10 @@ public class Classroom {
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "classroom", cascade = CascadeType.ALL)
     private Set<Activity> activities = new HashSet<>();
+
+
+    public void addActivity(Activity activity){
+        activities.add(activity);
+    }
+
 }

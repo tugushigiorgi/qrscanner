@@ -18,9 +18,10 @@ public class CheckInToken implements Serializable {
 
     @Id
     private String id;
-    private UUID token;
 
     @Indexed
+    private UUID token;
+
     private UUID userId;
     private UUID classroomId;
 

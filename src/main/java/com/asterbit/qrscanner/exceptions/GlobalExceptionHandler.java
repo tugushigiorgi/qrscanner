@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
         log.error(ex.getMessage());
-        var body = body(INTERNAL_SERVER_ERROR.value(), ex.getMessage());
+        var body = body(INTERNAL_SERVER_ERROR.value(), "Internal Server Error");
         return new ResponseEntity<>(body, INTERNAL_SERVER_ERROR);
     }
 

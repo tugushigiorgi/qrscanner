@@ -8,8 +8,9 @@ import com.asterbit.qrscanner.checkIntoken.CheckInTokenRepository;
 import com.asterbit.qrscanner.checkIntoken.service.CheckinTokenService;
 import com.asterbit.qrscanner.checkins.CheckIn;
 import com.asterbit.qrscanner.checkins.CheckInRepository;
-import com.asterbit.qrscanner.checkins.dto.CheckinDto;
+import com.asterbit.qrscanner.activity.dto.CheckinActivityDto;
 import com.asterbit.qrscanner.classroom.ClassroomRepository;
+import com.asterbit.qrscanner.classroom.dto.CheckinStudentDto;
 import com.asterbit.qrscanner.classroom.dto.CurrentActivitiesDto;
 import com.asterbit.qrscanner.classroom.service.ClassroomService;
 import com.asterbit.qrscanner.exceptions.InvalidTokenException;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -39,32 +41,32 @@ public class ClassroomServiceImpl implements ClassroomService {
     private final CheckInTokenRepository checkInTokenRepository;
     private final CheckInRepository checkInRepository;
 
-
     @Transactional
     @Override
     public CurrentActivitiesDto currentActivities(UUID classroomId) {
-        //TODO
-        var currentUserId = UUID.fromString(classroomId.toString());
+        var currentUserId = UUID.randomUUID();
         var classroom = classRoomRepository.findById(classroomId)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, String.format(CLASSROOM_NOT_FOUND_WITH_ID, classroomId)));
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND,
+                        String.format(CLASSROOM_NOT_FOUND_WITH_ID, classroomId)));
+
         var now = LocalDateTime.now();
-        var fromTime = now.plusMinutes(timeRangeProperties.getStartOffsetMinutes());
-        var toTime = now.plusHours(timeRangeProperties.getEndOffsetHours());
-        var currentActivities =
-                activityRepository.findActivitiesStartingInRange(classroomId, fromTime, toTime);
+        var fromTime = now.minusMinutes(timeRangeProperties.getStartOffsetMinutes());
+        var toTime = now.plusHours(timeRangeProperties.getEndOffsetHours()); // was plusMinutes before
+        var currentActivities = activityRepository.findActivitiesStartingInRange(classroomId, fromTime, toTime);
         if (isEmpty(currentActivities)) {
             throw new ResponseStatusException(NOT_FOUND, String.format(ACTIVITIES_NOT_FOUND, classroomId));
         }
         var activitiesDto = currentActivities.stream()
                 .map(activityMapper::toDto)
                 .collect(Collectors.toSet());
-        var token = CheckInToken
-                .builder()
+
+        var token = CheckInToken.builder()
                 .classroomId(classroomId)
                 .token(UUID.randomUUID())
                 .userId(currentUserId)
                 .build();
         var newCheckinToken = checkinTokenService.createCheckInToken(token);
+
         return CurrentActivitiesDto.builder()
                 .activities(activitiesDto)
                 .checkInToken(newCheckinToken.getToken())
@@ -73,24 +75,37 @@ public class ClassroomServiceImpl implements ClassroomService {
 
     @Transactional
     @Override
-    public CheckinDto checkinStudent(UUID classroomId, UUID activityId) {
-        var currentUserId = UUID.fromString(classroomId.toString());
-        //TODO
-        var currentUser = new User();
-        var classroom = classRoomRepository.findById(classroomId)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, String.format(CLASSROOM_NOT_FOUND_WITH_ID, classroomId)));
-        var currentActivity = activityRepository.findById(activityId)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, String.format(ACTIVITY_NOT_FOUND, classroomId)));
-        if (!tokenValid(classroomId, currentUserId)) {
-            throw new InvalidTokenException(String.format(TOKEN_NOT_FOUND, classroomId));
+    public CheckinActivityDto checkinStudent(CheckinStudentDto dto) {
+        var currentUserId = UUID.randomUUID();
+        var currentUser = User.builder().id(currentUserId)
+                .checkins(new HashSet<>())
+                .build();
+        var currentActivity = activityRepository.findById(dto.getActivityId())
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND,
+                        String.format(ACTIVITY_NOT_FOUND, dto.getActivityId())));
+
+        var now = LocalDateTime.now();
+        var windowStart = currentActivity.getStartTime().minusMinutes(timeRangeProperties.getStartOffsetMinutes());
+        var windowEnd = currentActivity.getStartTime();
+
+        if (now.isBefore(windowStart) || now.isAfter(windowEnd)) {
+            throw new ResponseStatusException(FORBIDDEN, CHECKIN_NOT_ALLOWED);
         }
+        var classroom = currentActivity.getClassroom();
+        if (!tokenValid(dto.getToken(), classroom.getId(), currentUserId)) {
+            throw new InvalidTokenException(String.format(TOKEN_NOT_FOUND, classroom.getId()));
+        }
+
         var newCheckin = CheckIn.builder()
                 .checkInDate(LocalDateTime.now())
                 .build();
         currentUser.addCheckIn(newCheckin);
         currentActivity.addCheckIn(newCheckin);
         var savedCheckin = checkInRepository.save(newCheckin);
-        return CheckinDto.builder()
+
+
+
+        return CheckinActivityDto.builder()
                 .checkedIn(true)
                 .checkinDate(savedCheckin.getCheckInDate())
                 .activityStart(currentActivity.getStartTime())
@@ -100,10 +115,19 @@ public class ClassroomServiceImpl implements ClassroomService {
                 .build();
     }
 
-    private boolean tokenValid(UUID classroomId, UUID userId) {
-        return checkInTokenRepository.findByUserId(userId)
-                .map(token -> token.getClassroomId().equals(classroomId))
+    private boolean tokenValid(UUID tokenId, UUID classroomId, UUID currentUserId) {
+        return checkInTokenRepository.findByToken(tokenId)
+                .map(token -> {
+                    boolean isValid = token.getClassroomId().equals(classroomId)
+                            && token.getUserId().equals(currentUserId);
+
+                    if (isValid) {
+                        checkInTokenRepository.deleteById(token.getId());
+                    }
+                    return isValid;
+                })
                 .orElse(false);
     }
+
 
 }

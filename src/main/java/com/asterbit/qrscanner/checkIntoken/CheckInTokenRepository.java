@@ -8,5 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface CheckInTokenRepository extends CrudRepository<CheckInToken, String> {
-    Optional<CheckInToken> findByUserId(UUID userId);
+    Optional<CheckInToken> findByToken(UUID token);
 }

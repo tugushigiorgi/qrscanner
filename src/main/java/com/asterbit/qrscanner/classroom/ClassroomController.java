@@ -1,19 +1,19 @@
 package com.asterbit.qrscanner.classroom;
 
-import com.asterbit.qrscanner.checkins.dto.CheckinDto;
+import com.asterbit.qrscanner.activity.dto.CheckinActivityDto;
+import com.asterbit.qrscanner.classroom.dto.CheckinStudentDto;
 import com.asterbit.qrscanner.classroom.dto.CurrentActivitiesDto;
 import com.asterbit.qrscanner.classroom.service.ClassroomService;
 import com.asterbit.qrscanner.network.RequireSchoolWifi;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@RestController("/classroom")
+@RestController
+@RequestMapping("/api/classroom")
 @RequiredArgsConstructor
 public class ClassroomController {
 
@@ -25,9 +25,9 @@ public class ClassroomController {
         return ResponseEntity.ok(classRoomService.currentActivities(classroomId));
     }
 
-    @PostMapping("/{classroomId}/checkin/{activityId}")
+    @PostMapping("/checkin")
     @RequireSchoolWifi
-    public ResponseEntity<CheckinDto> checkinStudent(@PathVariable UUID classroomId, @PathVariable UUID activityId) {
-        return ResponseEntity.ok(classRoomService.checkinStudent(classroomId, activityId));
+    public ResponseEntity<CheckinActivityDto> checkinStudent(@Valid @RequestBody CheckinStudentDto dto) {
+        return ResponseEntity.ok(classRoomService.checkinStudent(dto));
     }
 }

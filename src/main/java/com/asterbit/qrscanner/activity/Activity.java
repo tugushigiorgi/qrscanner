@@ -12,8 +12,9 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Data
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "activities")
