@@ -14,5 +14,8 @@ public final class ConstMessages {
     public static final String ACTIVITY_NOT_FOUND = "Activity with id %s not found";
     public static final String TOKEN_NOT_FOUND = "Token is invalid";
     public static final String CHECKIN_NOT_ALLOWED = "Check-in not allowed, you can check in 10 minutes before activity starts";
+    public static final String USER_NOT_FOUND_WITH_EMAIL = "User with email : %s not found";
+    public static final String INVALID_EMAIL_OR_PASSWORD = "Invalid email or password";
+    public static final String EMAIL_ALREADY_EXISTS = "Try different email";
 }
 

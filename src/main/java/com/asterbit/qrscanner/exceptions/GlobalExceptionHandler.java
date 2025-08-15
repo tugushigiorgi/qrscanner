@@ -1,6 +1,7 @@
 package com.asterbit.qrscanner.exceptions;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,8 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.asterbit.qrscanner.util.ConstMessages.*;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.*;
 
 @RestControllerAdvice
 @Slf4j
@@ -37,6 +37,17 @@ public class GlobalExceptionHandler {
         var body = body(INTERNAL_SERVER_ERROR.value(), "Internal Server Error");
         return new ResponseEntity<>(body, INTERNAL_SERVER_ERROR);
     }
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidCredentials(InvalidCredentialsException ex) {
+        log.warn(ex.getMessage());
+        var body = body(UNAUTHORIZED.value(), ex.getMessage());
+        return new ResponseEntity<>(body, UNAUTHORIZED);
+    }
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleEmailExists(EmailAlreadyExistsException ex) {
+        var body = body(BAD_REQUEST.value(), ex.getMessage());
+        return new ResponseEntity<>(body, BAD_REQUEST);
+    }
 
     private Map<String, Object> body(int status, String message) {
         Map<String, Object> body = new HashMap<>();
@@ -45,5 +56,6 @@ public class GlobalExceptionHandler {
         body.put(EX_ERROR, message);
         return body;
     }
+
 
 }

@@ -28,3 +28,6 @@ school:
     allowed-public-ips:
 #      - 203.0.113.45
 
+jwt:
+  signinkey: "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
+  expiration: 48000000
