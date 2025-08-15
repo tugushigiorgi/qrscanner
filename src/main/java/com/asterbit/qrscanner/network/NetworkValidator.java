@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 @Component
 @RequiredArgsConstructor
 public class NetworkValidator {
@@ -12,6 +14,9 @@ public class NetworkValidator {
 
     public boolean isFromSchool(HttpServletRequest request) {
         String clientIp = getClientIp(request);
+        if (isEmpty(schoolNetworkProperties.getAllowedPublicIps())) {
+            return true;
+        }
         return schoolNetworkProperties.getAllowedPublicIps().contains(clientIp);
     }
 
