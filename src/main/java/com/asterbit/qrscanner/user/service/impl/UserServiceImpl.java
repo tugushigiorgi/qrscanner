@@ -11,25 +11,21 @@ import com.asterbit.qrscanner.user.dto.RegisterUserDto;
 import com.asterbit.qrscanner.user.dto.UserDto;
 import com.asterbit.qrscanner.user.mapper.UserMapper;
 import com.asterbit.qrscanner.user.service.UserService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static com.asterbit.qrscanner.util.ConstMessages.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +35,8 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
     private final JwtFactory jwtFactory;
     private final PasswordEncoder passwordEncoder;
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
+
     @Transactional(readOnly = true)
     public JwtDto login(LoginDto loginDto) {
         var currentUser = userRepository.findByEmail(loginDto.getEmail())
@@ -59,7 +56,7 @@ public class UserServiceImpl implements UserService {
     public UserDto registerUser(RegisterUserDto dto) {
         var checkIfExists = userRepository.findByEmail(dto.email);
         if (checkIfExists.isPresent()) {
-            throw  new EmailAlreadyExistsException(EMAIL_ALREADY_EXISTS);
+            throw new EmailAlreadyExistsException(EMAIL_ALREADY_EXISTS);
         }
         var createUser = User.builder()
                 .firstName(dto.name)
@@ -68,23 +65,21 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(dto.password))
                 .build();
 
-        var entity= userRepository.save(createUser);
-        return  userMapper.toDto(entity);
+        var entity = userRepository.save(createUser);
+        return userMapper.toDto(entity);
     }
 
-//    @Override
-//    public UUID currentUserId() {
-//        if (authentication.getName() != null) {
-//            var user = userRepository.findByEmail(authentication.getName());
-//            if (user.isPresent()) {
-//                log.info("User found with User ID: {}", user.get().getId());
-//                return user.get().getId();
-//            } else {
-//                log.warn("No user found for email: {}", authentication.getName());
-//            }
-//        }
-//
-//        log.error("Failed to retrieve user ID: Authentication name is null or user not found.");
-//        throw new ResponseStatusException(BAD_REQUEST, "User not found or invalid authentication");
-//    }
+    @Override
+    public UUID currentUserId(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            throw new ResponseStatusException(BAD_REQUEST, AUTHENTICATION_INVALID);
+        }
+        return userRepository.findByEmail(authentication.getName())
+                .map(User::getId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        BAD_REQUEST,
+                        String.format(USER_NOT_FOUND_WITH_EMAIL, authentication.getName())
+                ));
+    }
+
 }

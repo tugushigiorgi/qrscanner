@@ -56,6 +56,4 @@ public class GlobalExceptionHandler {
         body.put(EX_ERROR, message);
         return body;
     }
-
-
 }
