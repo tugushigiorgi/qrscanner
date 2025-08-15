@@ -38,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Transactional(readOnly = true)
+    @Override
     public JwtDto login(LoginDto loginDto) {
         var currentUser = userRepository.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException(
@@ -53,6 +54,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
+    @Override
     public UserDto registerUser(RegisterUserDto dto) {
         var checkIfExists = userRepository.findByEmail(dto.email);
         if (checkIfExists.isPresent()) {
@@ -69,6 +71,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(entity);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public UUID currentUserId(Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {

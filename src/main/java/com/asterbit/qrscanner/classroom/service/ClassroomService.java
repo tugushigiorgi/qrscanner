@@ -8,8 +8,8 @@ import java.util.UUID;
 
 public interface ClassroomService {
 
-    CurrentActivitiesDto currentActivities(UUID classroomId);
+    CurrentActivitiesDto currentActivities(UUID classroomId,UUID userId);
 
-    CheckinActivityDto checkinStudent(CheckinStudentDto dto);
+    CheckinActivityDto checkinStudent(CheckinStudentDto dto,UUID userId);
 
 }
