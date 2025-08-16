@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: 3
-      author: girogi
+      author: giorgi
       changes:
         - createTable:
             tableName: activities
