@@ -29,12 +29,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ClassroomServiceImpl implements ClassroomService {
 
   private final ActivityMapper activityMapper;
@@ -46,18 +48,27 @@ public class ClassroomServiceImpl implements ClassroomService {
   private final CheckInRepository checkInRepository;
   private final UserRepository userRepository;
 
-  @Transactional
+  @Transactional(readOnly = true)
   @Override
   public CurrentActivitiesDto currentActivities(UUID classroomId, UUID userId) {
+    log.debug("Fetching current activities for classroomId={} and userId={}", classroomId, userId);
+
     var classroom = classRoomRepository.findById(classroomId)
-        .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, String.format(CLASSROOM_NOT_FOUND_WITH_ID, classroomId)));
+        .orElseThrow(() -> {
+          log.warn("Classroom not found with id={}", classroomId);
+          return new ResponseStatusException(NOT_FOUND, String.format(CLASSROOM_NOT_FOUND_WITH_ID, classroomId));
+        });
+
     var now = LocalDateTime.now();
     var fromTime = now.minusMinutes(timeRangeProperties.getStartOffsetMinutes());
     var toTime = now.plusHours(timeRangeProperties.getEndOffsetHours());
+
     var currentActivities = activityRepository.findActivitiesStartingInRange(classroomId, fromTime, toTime);
     if (isEmpty(currentActivities)) {
+      log.info("No activities found for classroomId={} in time window {} - {}", classroomId, fromTime, toTime);
       throw new ResponseStatusException(NOT_FOUND, String.format(ACTIVITIES_NOT_FOUND, classroomId));
     }
+
     var activitiesDto = currentActivities.stream()
         .map(activityMapper::toDto)
         .collect(Collectors.toSet());
@@ -68,6 +79,8 @@ public class ClassroomServiceImpl implements ClassroomService {
         .build();
     var newCheckinToken = checkinTokenService.createCheckInToken(token);
 
+    log.info("Generated check-in token {} for classroomId={} and userId={}", newCheckinToken.getId(), classroomId, userId);
+
     return CurrentActivitiesDto.builder()
         .activities(activitiesDto)
         .checkInToken(newCheckinToken.getId())
@@ -77,31 +90,46 @@ public class ClassroomServiceImpl implements ClassroomService {
   @Transactional
   @Override
   public CheckinActivityDto checkinStudent(CheckinStudentDto dto, UUID userId) {
+    log.debug("User {} attempting check-in for activity {}", userId, dto.getActivityId());
+
     var currentActivity = activityRepository.findById(dto.getActivityId())
-        .orElseThrow(() -> new ResponseStatusException(NOT_FOUND,
-            String.format(ACTIVITY_NOT_FOUND, dto.getActivityId())));
+        .orElseThrow(() -> {
+          log.warn("Activity not found with id={}", dto.getActivityId());
+          return new ResponseStatusException(NOT_FOUND,
+              String.format(ACTIVITY_NOT_FOUND, dto.getActivityId()));
+        });
 
     var now = LocalDateTime.now();
-
     var latestAllowed = currentActivity.getStartTime().minusMinutes(timeRangeProperties.getStartOffsetMinutes());
 
     if (now.isAfter(latestAllowed)) {
+      log.warn("Check-in attempt denied for user {}: after allowed time for activity {}", userId, dto.getActivityId());
       throw new ResponseStatusException(FORBIDDEN, CHECKIN_NOT_ALLOWED);
     }
+
     var classroom = currentActivity.getClassroom();
-    if (!isTokenValid(dto.getToken(), classroom.getId(), userId)) {
+    if (!validateToken(dto.getToken(), classroom.getId(), userId)) {
+      log.warn("Invalid token={} for userId={} in classroomId={}", dto.getToken(), userId, classroom.getId());
       throw new InvalidTokenException(TOKEN_NOT_FOUND);
     }
 
     var currentUser = userRepository.findById(userId)
-        .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST));
+        .orElseThrow(() -> {
+          log.error("User not found with id={}", userId);
+          return new ResponseStatusException(BAD_REQUEST);
+        });
 
     var newCheckin = CheckIn.builder()
         .checkInDate(LocalDateTime.now())
         .build();
+
     currentUser.addCheckIn(newCheckin);
     currentActivity.addCheckIn(newCheckin);
+
     var savedCheckin = checkInRepository.save(newCheckin);
+
+    log.info("User {} successfully checked into activity {} at {}", userId, currentActivity.getId(), savedCheckin.getCheckInDate());
+
     return CheckinActivityDto.builder()
         .checkinDate(savedCheckin.getCheckInDate())
         .activityStart(currentActivity.getStartTime())
@@ -111,15 +139,19 @@ public class ClassroomServiceImpl implements ClassroomService {
         .build();
   }
 
-  private boolean isTokenValid(String tokenId, UUID classroomId, UUID currentUserId) {
+  private boolean validateToken(String tokenId, UUID classroomId, UUID currentUserId) {
+    log.debug("Validating token={} for userId={} and classroomId={}", tokenId, currentUserId, classroomId);
+
     return checkInTokenRepository.findById(tokenId)
         .map(token -> {
           var matchesClassroom = classroomId.equals(token.getClassroomId());
           var matchesUser = currentUserId.equals(token.getUserId());
           if (matchesClassroom && matchesUser) {
+            log.info("Token {} is valid for userId={} and classroomId={}", tokenId, currentUserId, classroomId);
             checkInTokenRepository.delete(token);
             return true;
           }
+          log.warn("Token {} validation failed: classroomMatch={} userMatch={}", tokenId, matchesClassroom, matchesUser);
           return false;
         })
         .orElse(false);

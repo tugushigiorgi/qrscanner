@@ -16,7 +16,11 @@ public final class ConstMessages {
   public static final String CHECKIN_NOT_ALLOWED = "You can check in 10 minutes before activity starts";
   public static final String USER_NOT_FOUND_WITH_EMAIL = "User with email : %s not found";
   public static final String INVALID_EMAIL_OR_PASSWORD = "Invalid email or password";
-  public static final String EMAIL_ALREADY_EXISTS = "Try different email";
+  public static final String EMAIL_ALREADY_EXISTS = "Email already exists,try different email";
   public static final String AUTHENTICATION_INVALID = "Authentication is missing or invalid";
+  public static final String USER_NOT_FOUND = "User not found";
+  public static final String AUTHENTICATION_FAILED = "Authentication failed.";
+  public static final String UNEXPECTED_ERROR = "An unexpected error occurred";
+
 }
 
