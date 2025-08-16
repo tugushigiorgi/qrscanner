@@ -15,8 +15,6 @@ import org.springframework.stereotype.Component;
 public class DataInitializer implements CommandLineRunner {
 
   private final ClassroomRepository classroomRepository;
-  private final ActivityRepository activityRepository;
-
 
   @Override
   public void run(String... args) throws Exception {
@@ -24,7 +22,7 @@ public class DataInitializer implements CommandLineRunner {
     var activities = Activity.builder()
         .title("Activitie 3")
         .description("Activities are used for testing purposes")
-        .startTime(LocalDateTime.now().plusMinutes(100))
+        .startTime(LocalDateTime.now().plusHours(100))
         .endTime(LocalDateTime.now().plusHours(3))
         .build();
 
