@@ -8,6 +8,6 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "activity.time-range")
 public class ActivityTimeRangeProperties {
-    private long startOffsetMinutes;
-    private long endOffsetHours;
+  private long startOffsetMinutes;
+  private long endOffsetHours;
 }

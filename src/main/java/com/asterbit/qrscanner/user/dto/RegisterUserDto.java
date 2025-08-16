@@ -17,17 +17,17 @@ import lombok.Setter;
 @NoArgsConstructor
 public class RegisterUserDto {
 
-    @NotBlank(message = "Name is required")
-    public String name;
+  @NotBlank(message = "Name is required")
+  public String name;
 
-    @NotBlank(message = "Surname is required")
-    public String surname;
+  @NotBlank(message = "Surname is required")
+  public String surname;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "invalid email format")
-    public String email;
+  @NotBlank(message = "Email is required")
+  @Email(message = "invalid email format")
+  public String email;
 
-    @NotNull
-    @Size(min = 6, message = "password must be at least 6 characters long")
-    public String password;
+  @NotNull
+  @Size(min = 6, message = "password must be at least 6 characters long")
+  public String password;
 }

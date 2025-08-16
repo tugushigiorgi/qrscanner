@@ -2,13 +2,12 @@ package com.asterbit.qrscanner.classroom.dto;
 
 
 import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.UUID;
 import lombok.Setter;
 
 @Data
@@ -19,9 +18,9 @@ import lombok.Setter;
 @Setter
 public class CheckinStudentDto {
 
-    @NotNull
-    public String token;
-    @NotNull
-    public UUID  activityId;
+  @NotNull
+  public String token;
+  @NotNull
+  public UUID activityId;
 
 }

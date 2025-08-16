@@ -22,21 +22,21 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Authentication Controller", description = "Endpoints for login and register")
 public class AuthController {
 
-    private final UserService userService;
+  private final UserService userService;
 
-    @PostMapping("/login")
-    @Operation(summary = "login with username and password")
-    public ResponseEntity<JwtDto> login(
-            @Parameter(description = "Login Dto which includes username and password")
-            @Valid @RequestBody LoginDto loginDto) {
-        return ResponseEntity.ok(userService.login(loginDto));
-    }
+  @PostMapping("/login")
+  @Operation(summary = "login with username and password")
+  public ResponseEntity<JwtDto> login(
+      @Parameter(description = "Login Dto which includes username and password")
+      @Valid @RequestBody LoginDto loginDto) {
+    return ResponseEntity.ok(userService.login(loginDto));
+  }
 
-    @PostMapping("/register")
-    @Operation(summary = "register user")
-    public ResponseEntity<UserDto> register(
-            @Parameter(description = "Register Dto to register")
-            @Valid @RequestBody RegisterUserDto userDto) {
-        return ResponseEntity.ok(userService.registerUser(userDto));
-    }
+  @PostMapping("/register")
+  @Operation(summary = "register user")
+  public ResponseEntity<UserDto> register(
+      @Parameter(description = "Register Dto to register")
+      @Valid @RequestBody RegisterUserDto userDto) {
+    return ResponseEntity.ok(userService.registerUser(userDto));
+  }
 }

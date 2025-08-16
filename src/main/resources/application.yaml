@@ -4,8 +4,8 @@ spring:
     enabled: true
   datasource:
     url: jdbc:postgresql://localhost:5432/qrDb
-#    username: ${postgresUser}
-#    password: ${postgresPassword}
+    #    username: ${postgresUser}
+    #    password: ${postgresPassword}
     username: myuser
     password: mypassword
     driverClassName: org.postgresql.Driver

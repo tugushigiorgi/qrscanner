@@ -1,8 +1,11 @@
 package com.asterbit.qrscanner.redis.dto;
 
-import lombok.*;
-
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -10,5 +13,5 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CheckInTokenDto {
-    private UUID token;
+  private UUID token;
 }
