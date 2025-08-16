@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 4
+      id: 1
       author: girogi
       changes:
         - createTable:
@@ -11,31 +11,33 @@ databaseChangeLog:
                   type: uuid
                   constraints:
                     primaryKey: true
-                    nullable: false
-              - column:
-                  name: check_in_date
-                  type: timestamp
-              - column:
-                  name: activity_id
-                  type: uuid
-                  constraints:
-                    nullable: false
               - column:
                   name: user_id
                   type: uuid
-                  constraints:
-                    nullable: false
+              - column:
+                  name: activity_id
+                  type: uuid
+
+  - changeSet:
+      id: 2
+      author: girogi
+      changes:
         - addForeignKeyConstraint:
-            baseTableName: check_ins
-            baseColumnNames: activity_id
-            constraintName: fk_checkins_activity
-            referencedTableName: activities
-            referencedColumnNames: id
-            onDelete: CASCADE
-        - addForeignKeyConstraint:
+            constraintName: fk_checkins_user
             baseTableName: check_ins
             baseColumnNames: user_id
-            constraintName: fk_checkins_user
             referencedTableName: users
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 3
+      author: girogi
+      changes:
+        - addForeignKeyConstraint:
+            constraintName: fk_checkins_activity
+            baseTableName: check_ins
+            baseColumnNames: activity_id
+            referencedTableName: activities
             referencedColumnNames: id
             onDelete: CASCADE

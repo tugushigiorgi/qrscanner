@@ -7,3 +7,8 @@ databaseChangeLog:
       file: db/changelog/postgres/create-check_ins-table.yaml
   - include:
       file: db/changelog/postgres/create-user-table.yaml
+
+
+
+
+

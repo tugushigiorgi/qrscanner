@@ -1,7 +1,6 @@
 package com.asterbit.qrscanner.exceptions;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -46,6 +45,7 @@ public class GlobalExceptionHandler {
         var body = body(INTERNAL_SERVER_ERROR.value(), "Internal Server Error");
         return new ResponseEntity<>(body, INTERNAL_SERVER_ERROR);
     }
+
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidCredentials(InvalidCredentialsException ex) {
         log.warn(ex.getMessage());
