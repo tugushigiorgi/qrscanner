@@ -7,9 +7,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.asterbit.qrscanner.classroom.ClassroomRepository;
 import com.asterbit.qrscanner.classroom.dto.CheckinStudentDto;
 import com.asterbit.qrscanner.classroom.dto.CurrentActivitiesDto;
+import com.asterbit.qrscanner.classroom.service.ClassroomService;
 import com.asterbit.qrscanner.security.dto.LoginDto;
+import com.asterbit.qrscanner.user.dto.RegisterUserDto;
 import com.asterbit.qrscanner.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
@@ -20,9 +23,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 public class ClassroomControllerIntegrationTest {
 
   @Autowired
@@ -34,14 +39,22 @@ public class ClassroomControllerIntegrationTest {
   @Autowired
   private ObjectMapper objectMapper;
 
+  @Autowired
+  private ClassroomRepository classRoomRepository;
+
+  private UUID dbclassroomId;
+
   private UUID classroomId;
   private String jwtToken;
 
   @BeforeEach
   void setup() {
     // Register and login user
-//    var registerDto = new RegisterUserDto("John", "Doe", "jjohn@example.com", "password123");
-//    userService.registerUser(registerDto);
+    var registerDto = new RegisterUserDto("John", "Doe", "jjohn@example.com", "password123");
+    userService.registerUser(registerDto);
+
+    dbclassroomId=classRoomRepository.findAll().stream()
+        .findFirst().get().getId();
 
     jwtToken = userService.login(new LoginDto("jjohn@example.com", "password123")).getToken();
     classroomId = UUID.randomUUID();
@@ -49,16 +62,16 @@ public class ClassroomControllerIntegrationTest {
 
   @Test
   void testGetCurrentActivities() throws Exception {
-    mockMvc.perform(get("/api/classroom/c1eab8ae-a7ab-40d8-a6da-931df645b94b/activities", classroomId)
+    mockMvc.perform(get(String.format("/api/classroom/%s/activities", dbclassroomId))
             .header("Authorization", "Bearer " + jwtToken))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.activities", notNullValue())); // adjust to your CurrentActivitiesDto fields
+        .andExpect(jsonPath("$.activities", notNullValue()));
   }
 
   @Test
   void testCheckinUsingCurrentActivities() throws Exception {
 
-    var activitiesResult = mockMvc.perform(get("/api/classroom/c1eab8ae-a7ab-40d8-a6da-931df645b94b/activities", classroomId)
+    var activitiesResult = mockMvc.perform(get(String.format("/api/classroom/%s/activities", dbclassroomId))
             .header("Authorization", "Bearer " + jwtToken))
         .andExpect(status().isOk())
         .andReturn();

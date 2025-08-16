@@ -17,6 +17,7 @@ import com.asterbit.qrscanner.user.dto.RegisterUserDto;
 import com.asterbit.qrscanner.user.dto.UserDto;
 import com.asterbit.qrscanner.user.mapper.UserMapper;
 import com.asterbit.qrscanner.user.service.UserService;
+import java.util.HashSet;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -65,6 +66,7 @@ public class UserServiceImpl implements UserService {
     var createUser = User.builder()
         .firstName(dto.name)
         .lastName(dto.surname)
+        .checkins(new HashSet<>())
         .email(dto.email)
         .password(passwordEncoder.encode(dto.password))
         .build();

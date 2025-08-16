@@ -26,6 +26,7 @@ import com.asterbit.qrscanner.redis.CheckInTokenRepository;
 import com.asterbit.qrscanner.redis.service.CheckinTokenService;
 import com.asterbit.qrscanner.user.UserRepository;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
