@@ -64,17 +64,16 @@ class UserServiceImplTest {
     userId = UUID.randomUUID();
     user = User.builder()
         .id(userId)
-        .firstName("John")
-        .lastName("Doe")
-        .email("john@example.com")
+        .firstName("giorgi")
+        .lastName("tughushi")
+        .email("giorgi@example.com")
         .password("encodedPassword")
         .build();
   }
 
-  // ===== LOGIN SUCCESS =====
   @Test
   void login_success() {
-    var loginDto = new LoginDto("john@example.com", "password");
+    var loginDto = new LoginDto("giorgi@example.com", "password");
 
     when(userRepository.findByEmail(loginDto.getEmail())).thenReturn(Optional.of(user));
     when(jwtFactory.generateToken(user)).thenReturn("fake-jwt-token");
@@ -89,7 +88,6 @@ class UserServiceImplTest {
     );
   }
 
-  // ===== LOGIN FAILURE - USER NOT FOUND =====
   @Test
   void login_userNotFound() {
     var loginDto = new LoginDto("missing@example.com", "password");
@@ -101,10 +99,9 @@ class UserServiceImplTest {
         .hasMessageContaining(String.format(USER_NOT_FOUND_WITH_EMAIL, loginDto.getEmail()));
   }
 
-  // ===== LOGIN FAILURE - INVALID CREDENTIALS =====
   @Test
   void login_invalidCredentials() {
-    var loginDto = new LoginDto("john@example.com", "wrongpassword");
+    var loginDto = new LoginDto("giorgi@example.com", "wrongpassword");
 
     when(userRepository.findByEmail(loginDto.getEmail())).thenReturn(Optional.of(user));
     doThrow(BadCredentialsException.class)
@@ -120,31 +117,30 @@ class UserServiceImplTest {
   @Test
   void registerUser_success() {
     var dto = RegisterUserDto.builder()
-        .name("John")
-        .surname("Doe")
-        .email("john@example.com")
+        .name("giorgi")
+        .surname("tughushi")
+        .email("giorgi@example.com")
         .password("password")
         .build();
 
     when(userRepository.findByEmail(dto.getEmail())).thenReturn(Optional.empty());
     when(passwordEncoder.encode(dto.getPassword())).thenReturn("encodedPassword");
     when(userRepository.save(any(User.class))).thenReturn(user);
-    when(userMapper.toDto(user)).thenReturn(new UserDto(userId, "John", "Doe", "john@example.com"));
+    when(userMapper.toDto(user)).thenReturn(new UserDto(userId, "giorgi", "tughushi", "giorgi@example.com"));
 
     var result = userService.registerUser(dto);
 
     assertThat(result).isNotNull();
     assertThat(result.getId()).isEqualTo(userId);
-    assertThat(result.getEmail()).isEqualTo("john@example.com");
+    assertThat(result.getEmail()).isEqualTo("giorgi@example.com");
   }
 
-  // ===== REGISTER FAILURE - EMAIL EXISTS =====
   @Test
   void registerUser_emailExists() {
     var dto = RegisterUserDto.builder()
-        .name("John")
-        .surname("Doe")
-        .email("john@example.com")
+        .name("giorgi")
+        .surname("tughushi")
+        .email("giorgi@example.com")
         .password("password")
         .build();
 
@@ -155,7 +151,6 @@ class UserServiceImplTest {
         .hasMessageContaining(EMAIL_ALREADY_EXISTS);
   }
 
-  // ===== CURRENT USER ID SUCCESS =====
   @Test
   void currentUserId_success() {
     Authentication auth = mock(Authentication.class);
@@ -167,7 +162,6 @@ class UserServiceImplTest {
     assertThat(id).isEqualTo(userId);
   }
 
-  // ===== CURRENT USER ID FAILURE =====
   @Test
   void currentUserId_invalidAuthentication() {
     assertThatThrownBy(() -> userService.currentUserId(null))

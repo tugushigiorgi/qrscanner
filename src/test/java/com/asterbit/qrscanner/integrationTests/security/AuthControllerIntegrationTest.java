@@ -1,5 +1,4 @@
-package com.asterbit.qrscanner.security;
-
+package com.asterbit.qrscanner.integrationTests.security;
 
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -16,7 +15,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -30,31 +28,31 @@ public class AuthControllerIntegrationTest {
 
   @Test
   void testRegisterUser() throws Exception {
-    RegisterUserDto registerDto = RegisterUserDto.builder()
-        .name("John")
-        .surname("Doe")
-        .email("new@example.com")
+    var registerDto = RegisterUserDto.builder()
+        .name("Giorgi")
+        .surname("Tughushi")
+        .email("new2@example.com")
         .password("password123")
         .build();
 
-    MvcResult result = mockMvc.perform(post("/api/auth/register")
+    var result = mockMvc.perform(post("/api/auth/register")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(registerDto)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", notNullValue()))
-        .andExpect(jsonPath("$.firstName").value("John"))
-        .andExpect(jsonPath("$.lastName").value("Doe"))
-        .andExpect(jsonPath("$.email").value("new@example.com"))
+        .andExpect(jsonPath("$.firstName").value("Giorgi"))
+        .andExpect(jsonPath("$.lastName").value("Tughushi"))
+        .andExpect(jsonPath("$.email").value("new2@example.com"))
         .andReturn();
   }
 
   @Test
   void testLoginUser() throws Exception {
-    // First register the user
-    RegisterUserDto registerDto = RegisterUserDto.builder()
-        .name("Alice")
-        .surname("Smith")
-        .email("alice@example.com")
+    // register the user
+    var registerDto = RegisterUserDto.builder()
+        .name("giorgi")
+        .surname("tughushi")
+        .email("gio@example.com")
         .password("password123")
         .build();
 
@@ -63,20 +61,20 @@ public class AuthControllerIntegrationTest {
             .content(objectMapper.writeValueAsString(registerDto)))
         .andExpect(status().isOk());
 
-    // Login with the same user
-    LoginDto loginDto = LoginDto.builder()
-        .email("alice@example.com")
+    // Login
+    var loginDto = LoginDto.builder()
+        .email("gio@example.com")
         .password("password123")
         .build();
 
-    MvcResult result = mockMvc.perform(post("/api/auth/login")
+    var result = mockMvc.perform(post("/api/auth/login")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(loginDto)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.token", notNullValue()))
         .andReturn();
 
-    String response = result.getResponse().getContentAsString();
+    var response = result.getResponse().getContentAsString();
     assertNotNull(response);
   }
 }
