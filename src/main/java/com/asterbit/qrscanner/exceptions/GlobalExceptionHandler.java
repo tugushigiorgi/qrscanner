@@ -2,6 +2,7 @@ package com.asterbit.qrscanner.exceptions;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -32,6 +33,7 @@ public class GlobalExceptionHandler {
         var body = body(ex.getStatusCode().value(), ex.getMessage());
         return new ResponseEntity<>(body, ex.getStatusCode());
     }
+
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidTokenException(InvalidTokenException ex) {
         log.error(ex.getMessage());
@@ -52,10 +54,17 @@ public class GlobalExceptionHandler {
         var body = body(UNAUTHORIZED.value(), ex.getMessage());
         return new ResponseEntity<>(body, UNAUTHORIZED);
     }
+
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleEmailExists(EmailAlreadyExistsException ex) {
         var body = body(BAD_REQUEST.value(), ex.getMessage());
         return new ResponseEntity<>(body, BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleUsernameNotFoundException(UsernameNotFoundException ex) {
+        var body = body(NOT_FOUND.value(), ex.getMessage());
+        return new ResponseEntity<>(body, NOT_FOUND);
     }
 
     private Map<String, Object> body(int status, String message) {

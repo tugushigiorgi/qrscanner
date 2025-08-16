@@ -34,14 +34,3 @@ databaseChangeLog:
                   constraints:
                     nullable: false
 
-  - changeSet:
-      id: 3
-      author: asterbit
-      changes:
-        - addForeignKeyConstraint:
-            baseTableName: check_ins
-            baseColumnNames: user_id
-            constraintName: fk_checkin_user
-            referencedTableName: users
-            referencedColumnNames: id
-            onDelete: CASCADE
