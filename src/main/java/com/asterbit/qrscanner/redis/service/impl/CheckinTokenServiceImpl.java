@@ -1,8 +1,8 @@
-package com.asterbit.qrscanner.checkIntoken.service.impl;
+package com.asterbit.qrscanner.redis.service.impl;
 
-import com.asterbit.qrscanner.checkIntoken.CheckInToken;
-import com.asterbit.qrscanner.checkIntoken.CheckInTokenRepository;
-import com.asterbit.qrscanner.checkIntoken.service.CheckinTokenService;
+import com.asterbit.qrscanner.redis.CheckInToken;
+import com.asterbit.qrscanner.redis.CheckInTokenRepository;
+import com.asterbit.qrscanner.redis.service.CheckinTokenService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

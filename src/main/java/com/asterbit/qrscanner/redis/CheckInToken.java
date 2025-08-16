@@ -1,11 +1,10 @@
-package com.asterbit.qrscanner.checkIntoken;
+package com.asterbit.qrscanner.redis;
 
 import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.index.Indexed;
 
 import java.io.Serializable;
 import java.util.UUID;

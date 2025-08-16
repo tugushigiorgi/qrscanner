@@ -1,10 +1,7 @@
-package com.asterbit.qrscanner.checkIntoken;
+package com.asterbit.qrscanner.redis;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 public interface CheckInTokenRepository extends CrudRepository<CheckInToken, String> {

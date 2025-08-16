@@ -1,4 +1,4 @@
-package com.asterbit.qrscanner.checkIntoken.dto;
+package com.asterbit.qrscanner.redis.dto;
 
 import lombok.*;
 
