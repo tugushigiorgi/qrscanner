@@ -26,13 +26,13 @@ public class DataInitializer  implements CommandLineRunner {
         var activities =Activity.builder()
                 .title("Activitie 3")
                 .description("Activities are used for testing purposes")
-                .startTime(LocalDateTime.now().plusMinutes(10))
+                .startTime(LocalDateTime.now().plusMinutes(100))
                 .endTime(LocalDateTime.now().plusHours(3))
                 .build();
 
 
         var newclassroom = Classroom.builder()
-                .name("New Classroom 3")
+                .name("giorgi")
                 .location("New Location 3")
                 .activities(new HashSet<>())
                 .build();
