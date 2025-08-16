@@ -22,8 +22,8 @@ public class DataInitializer implements CommandLineRunner {
     var activities = Activity.builder()
         .title("Activitie 3")
         .description("Activities are used for testing purposes")
-        .startTime(LocalDateTime.now().plusHours(100))
-        .endTime(LocalDateTime.now().plusHours(3))
+        .startTime(LocalDateTime.now().plusHours(25))
+        .endTime(LocalDateTime.now().plusHours(30))
         .build();
 
 
