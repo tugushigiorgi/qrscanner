@@ -1,12 +1,19 @@
 package com.asterbit.qrscanner.classroom.service.impl;
 
+import static com.asterbit.qrscanner.util.ConstMessages.ACTIVITIES_NOT_FOUND;
+import static com.asterbit.qrscanner.util.ConstMessages.ACTIVITY_NOT_FOUND;
+import static com.asterbit.qrscanner.util.ConstMessages.CHECKIN_NOT_ALLOWED;
+import static com.asterbit.qrscanner.util.ConstMessages.CLASSROOM_NOT_FOUND_WITH_ID;
+import static com.asterbit.qrscanner.util.ConstMessages.TOKEN_NOT_FOUND;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 import com.asterbit.qrscanner.activity.ActivityRepository;
 import com.asterbit.qrscanner.activity.ActivityTimeRangeProperties;
 import com.asterbit.qrscanner.activity.dto.CheckinActivityDto;
 import com.asterbit.qrscanner.activity.mapper.ActivityMapper;
-import com.asterbit.qrscanner.redis.CheckInToken;
-import com.asterbit.qrscanner.redis.CheckInTokenRepository;
-import com.asterbit.qrscanner.redis.service.CheckinTokenService;
 import com.asterbit.qrscanner.checkins.CheckIn;
 import com.asterbit.qrscanner.checkins.CheckInRepository;
 import com.asterbit.qrscanner.classroom.ClassroomRepository;
@@ -14,19 +21,17 @@ import com.asterbit.qrscanner.classroom.dto.CheckinStudentDto;
 import com.asterbit.qrscanner.classroom.dto.CurrentActivitiesDto;
 import com.asterbit.qrscanner.classroom.service.ClassroomService;
 import com.asterbit.qrscanner.exceptions.InvalidTokenException;
+import com.asterbit.qrscanner.redis.CheckInToken;
+import com.asterbit.qrscanner.redis.CheckInTokenRepository;
+import com.asterbit.qrscanner.redis.service.CheckinTokenService;
 import com.asterbit.qrscanner.user.UserRepository;
+import java.time.LocalDateTime;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static com.asterbit.qrscanner.util.ConstMessages.*;
-import static org.springframework.http.HttpStatus.*;
-import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
 @AllArgsConstructor
@@ -77,10 +82,10 @@ public class ClassroomServiceImpl implements ClassroomService {
                         String.format(ACTIVITY_NOT_FOUND, dto.getActivityId())));
 
         var now = LocalDateTime.now();
-        var windowStart = currentActivity.getStartTime().minusMinutes(timeRangeProperties.getStartOffsetMinutes());
-        var windowEnd = currentActivity.getStartTime();
 
-        if (now.isBefore(windowStart) || now.isAfter(windowEnd)) {
+        var latestAllowed = currentActivity.getStartTime().minusMinutes(timeRangeProperties.getStartOffsetMinutes());
+
+         if (now.isAfter(latestAllowed)) {
             throw new ResponseStatusException(FORBIDDEN, CHECKIN_NOT_ALLOWED);
         }
         var classroom = currentActivity.getClassroom();
