@@ -22,11 +22,9 @@ import com.asterbit.qrscanner.classroom.dto.CurrentActivitiesDto;
 import com.asterbit.qrscanner.classroom.service.ClassroomService;
 import com.asterbit.qrscanner.exceptions.InvalidTokenException;
 import com.asterbit.qrscanner.redis.CheckInToken;
-import com.asterbit.qrscanner.redis.CheckInTokenRepository;
 import com.asterbit.qrscanner.redis.service.CheckinTokenService;
 import com.asterbit.qrscanner.user.UserRepository;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -45,7 +43,7 @@ public class ClassroomServiceImpl implements ClassroomService {
   private final CheckinTokenService checkinTokenService;
   private final ActivityRepository activityRepository;
   private final ActivityTimeRangeProperties timeRangeProperties;
-  private final CheckInTokenRepository checkInTokenRepository;
+  private final CheckinTokenService tokenService;
   private final CheckInRepository checkInRepository;
   private final UserRepository userRepository;
 
@@ -109,7 +107,7 @@ public class ClassroomServiceImpl implements ClassroomService {
     }
 
     var classroom = currentActivity.getClassroom();
-    if (!validateToken(dto.getToken(), classroom.getId(), userId)) {
+    if (!tokenService.validateToken(dto.getToken(), classroom.getId(), userId)) {
       log.warn("Invalid token={} for userId={} in classroomId={}", dto.getToken(), userId, classroom.getId());
       throw new InvalidTokenException(TOKEN_NOT_FOUND);
     }
@@ -139,23 +137,4 @@ public class ClassroomServiceImpl implements ClassroomService {
         .ClassroomLocation(classroom.getLocation())
         .build();
   }
-
-  private boolean validateToken(String tokenId, UUID classroomId, UUID currentUserId) {
-    log.debug("Validating token={} for userId={} and classroomId={}", tokenId, currentUserId, classroomId);
-
-    return checkInTokenRepository.findById(tokenId)
-        .map(token -> {
-          var matchesClassroom = classroomId.equals(token.getClassroomId());
-          var matchesUser = currentUserId.equals(token.getUserId());
-          if (matchesClassroom && matchesUser) {
-            log.info("Token {} is valid for userId={} and classroomId={}", tokenId, currentUserId, classroomId);
-            checkInTokenRepository.delete(token);
-            return true;
-          }
-          log.warn("Token {} validation failed: classroomMatch={} userMatch={}", tokenId, matchesClassroom, matchesUser);
-          return false;
-        })
-        .orElse(false);
-  }
-
 }
