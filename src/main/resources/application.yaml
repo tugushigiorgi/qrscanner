@@ -4,8 +4,6 @@ spring:
     enabled: true
   datasource:
     url: jdbc:postgresql://localhost:5432/qrDb
-    #    username: ${postgresUser}
-    #    password: ${postgresPassword}
     username: myuser
     password: mypassword
     driverClassName: org.postgresql.Driver
@@ -21,7 +19,7 @@ spring:
 activity:
   time-range:
     start-offset-minutes: 10
-    end-offset-hours: 6
+    end-offset-hours: 1000
 
 school:
   network:
