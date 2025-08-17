@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,15 +23,17 @@ public class DataInitializer implements CommandLineRunner {
 
   private final UserRepository userRepository;
 
+  private final PasswordEncoder passwordEncoder;
+
   @Transactional
   @Override
   public void run(String... args) throws Exception {
 
     var user =User.builder()
         .email("test@gmail.com")
-        .firstName("Giorgi")
-        .lastName("tughushi")
-        .password("test123")
+        .firstName("test")
+        .lastName("test")
+        .password(passwordEncoder.encode("test123"))
         .checkins(new HashSet<>())
         .build();
     userRepository.save(user);
