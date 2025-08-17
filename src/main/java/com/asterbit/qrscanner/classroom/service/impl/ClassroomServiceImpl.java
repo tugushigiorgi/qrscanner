@@ -1,29 +1,25 @@
 package com.asterbit.qrscanner.classroom.service.impl;
 
-import static com.asterbit.qrscanner.util.ConstMessages.ACTIVITIES_NOT_FOUND;
-import static com.asterbit.qrscanner.util.ConstMessages.ACTIVITY_NOT_FOUND;
-import static com.asterbit.qrscanner.util.ConstMessages.CHECKIN_NOT_ALLOWED;
-import static com.asterbit.qrscanner.util.ConstMessages.CLASSROOM_NOT_FOUND_WITH_ID;
 import static com.asterbit.qrscanner.util.ConstMessages.TOKEN_NOT_FOUND;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.util.CollectionUtils.isEmpty;
 
-import com.asterbit.qrscanner.activity.ActivityRepository;
 import com.asterbit.qrscanner.activity.ActivityTimeRangeProperties;
 import com.asterbit.qrscanner.activity.dto.CheckinActivityDto;
 import com.asterbit.qrscanner.activity.mapper.ActivityMapper;
+import com.asterbit.qrscanner.activity.service.ActivityService;
 import com.asterbit.qrscanner.checkins.CheckIn;
 import com.asterbit.qrscanner.checkins.CheckInRepository;
+import com.asterbit.qrscanner.classroom.Classroom;
 import com.asterbit.qrscanner.classroom.ClassroomRepository;
 import com.asterbit.qrscanner.classroom.dto.CheckinStudentDto;
 import com.asterbit.qrscanner.classroom.dto.CurrentActivitiesDto;
 import com.asterbit.qrscanner.classroom.service.ClassroomService;
+import com.asterbit.qrscanner.exceptions.AlreadyCheckedInException;
+import com.asterbit.qrscanner.exceptions.CheckInNotAllowedException;
+import com.asterbit.qrscanner.exceptions.ClassroomNotFoundException;
 import com.asterbit.qrscanner.exceptions.InvalidTokenException;
 import com.asterbit.qrscanner.redis.CheckInToken;
 import com.asterbit.qrscanner.redis.service.CheckinTokenService;
-import com.asterbit.qrscanner.user.UserRepository;
+import com.asterbit.qrscanner.user.service.UserService;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -31,58 +27,54 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @AllArgsConstructor
 @Slf4j
+
 public class ClassroomServiceImpl implements ClassroomService {
 
   private final ActivityMapper activityMapper;
   private final ClassroomRepository classRoomRepository;
   private final CheckinTokenService checkinTokenService;
-  private final ActivityRepository activityRepository;
+  private final ActivityService activityService;
   private final ActivityTimeRangeProperties timeRangeProperties;
   private final CheckinTokenService tokenService;
   private final CheckInRepository checkInRepository;
-  private final UserRepository userRepository;
+  private final UserService userService;
+  private final LocalDateTime now = LocalDateTime.now();
 
   @Transactional(readOnly = true)
   @Override
   public CurrentActivitiesDto currentActivities(UUID classroomId, UUID userId) {
     log.debug("Fetching current activities for classroomId={} and userId={}", classroomId, userId);
 
-    var classroom = classRoomRepository.findById(classroomId)
-        .orElseThrow(() -> {
-          log.warn("Classroom not found with id={}", classroomId);
-          return new ResponseStatusException(NOT_FOUND, String.format(CLASSROOM_NOT_FOUND_WITH_ID, classroomId));
-        });
+    var classroom = findById(classroomId);
 
-    var now = LocalDateTime.now();
     var fromTime = now.minusMinutes(timeRangeProperties.getStartOffsetMinutes());
     var toTime = now.plusHours(timeRangeProperties.getEndOffsetHours());
 
-    var currentActivities = activityRepository.findActivitiesStartingInRange(classroomId, fromTime, toTime);
-    if (isEmpty(currentActivities)) {
-      log.info("No activities found for classroomId={} in time window {} - {}", classroomId, fromTime, toTime);
-      throw new ResponseStatusException(NOT_FOUND, String.format(ACTIVITIES_NOT_FOUND, classroomId));
-    }
+    var currentActivities = activityService.findActivitiesStartingInRange(classroomId, fromTime, toTime);
 
     var activitiesDto = currentActivities.stream()
         .map(activityMapper::toDto)
         .collect(Collectors.toSet());
 
-    var token = CheckInToken.builder()
-        .classroomId(classroomId)
-        .userId(userId)
-        .build();
-    var newCheckinToken = checkinTokenService.createCheckInToken(token);
+    String checkInTokenId = null;
+    if (!activitiesDto.isEmpty()) {
+      var token = CheckInToken.builder()
+          .classroomId(classroomId)
+          .userId(userId)
+          .build();
 
-    log.info("Generated check-in token {} for classroomId={} and userId={}", newCheckinToken.getId(), classroomId, userId);
+      var newCheckinToken = checkinTokenService.createCheckInToken(token);
+      checkInTokenId = newCheckinToken.getId();
+      log.info("Generated check-in token {} for classroomId={} and userId={}", checkInTokenId, classroomId, userId);
+    }
 
     return CurrentActivitiesDto.builder()
         .activities(activitiesDto)
-        .checkInToken(newCheckinToken.getId())
+        .checkInToken(checkInTokenId)
         .build();
   }
 
@@ -91,32 +83,26 @@ public class ClassroomServiceImpl implements ClassroomService {
   public CheckinActivityDto checkinStudent(CheckinStudentDto dto, UUID userId) {
     log.debug("User {} attempting check-in for activity {}", userId, dto.getActivityId());
 
-    var currentActivity = activityRepository.findById(dto.getActivityId())
-        .orElseThrow(() -> {
-          log.warn("Activity not found with id={}", dto.getActivityId());
-          return new ResponseStatusException(NOT_FOUND,
-              String.format(ACTIVITY_NOT_FOUND, dto.getActivityId()));
-        });
+    var currentActivity = activityService.findById(dto.getActivityId());
+    var alreadyCheckedIn = userService.isCheckedIn(userId, dto.getActivityId());
 
-    var now = LocalDateTime.now();
-    var latestAllowed = currentActivity.getStartTime().minusMinutes(timeRangeProperties.getStartOffsetMinutes());
+    if (alreadyCheckedIn) {
+      throw new AlreadyCheckedInException(dto.getActivityId());
+    }
+
+    var latestAllowed = currentActivity.getStartTime()
+        .minusMinutes(timeRangeProperties.getStartOffsetMinutes());
 
     if (now.isAfter(latestAllowed)) {
-      log.warn("Check-in attempt denied for user {}: after allowed time for activity {}", userId, dto.getActivityId());
-      throw new ResponseStatusException(FORBIDDEN, CHECKIN_NOT_ALLOWED);
+      throw new CheckInNotAllowedException(latestAllowed);
     }
 
     var classroom = currentActivity.getClassroom();
     if (!tokenService.validateToken(dto.getToken(), classroom.getId(), userId)) {
-      log.warn("Invalid token={} for userId={} in classroomId={}", dto.getToken(), userId, classroom.getId());
       throw new InvalidTokenException(TOKEN_NOT_FOUND);
     }
 
-    var currentUser = userRepository.findById(userId)
-        .orElseThrow(() -> {
-          log.error("User not found with id={}", userId);
-          return new ResponseStatusException(BAD_REQUEST);
-        });
+    var currentUser = userService.findById(userId);
 
     var newCheckin = CheckIn.builder()
         .checkInDate(LocalDateTime.now())
@@ -136,5 +122,11 @@ public class ClassroomServiceImpl implements ClassroomService {
         .ClassroomName(classroom.getName())
         .ClassroomLocation(classroom.getLocation())
         .build();
+  }
+
+  @Override
+  public Classroom findById(UUID classroomId) {
+    return classRoomRepository.findById(classroomId)
+        .orElseThrow(() -> new ClassroomNotFoundException(classroomId));
   }
 }

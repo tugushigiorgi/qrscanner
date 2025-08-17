@@ -2,6 +2,7 @@ package com.asterbit.qrscanner.user.service;
 
 import com.asterbit.qrscanner.security.dto.JwtDto;
 import com.asterbit.qrscanner.security.dto.LoginDto;
+import com.asterbit.qrscanner.user.User;
 import com.asterbit.qrscanner.user.dto.RegisterUserDto;
 import com.asterbit.qrscanner.user.dto.UserDto;
 import java.util.UUID;
@@ -13,4 +14,9 @@ public interface UserService {
   UserDto registerUser(RegisterUserDto dto);
 
   UUID currentUserId(Authentication authentication);
+
+  Boolean isCheckedIn(UUID userId,UUID activityId);
+
+  User findById(UUID userId);
+
 }

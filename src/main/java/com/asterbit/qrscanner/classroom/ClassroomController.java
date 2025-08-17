@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,9 +34,13 @@ public class ClassroomController {
   @GetMapping("/{classroomId}/activities")
   @RequireSchoolWifi
   @Operation(summary = "Get current classroom activities")
-  public ResponseEntity<CurrentActivitiesDto> currentActivities(Authentication authentication, @Parameter(description = "ID of the classroom") @PathVariable UUID classroomId) {
+  public ResponseEntity<CurrentActivitiesDto> currentActivities(Authentication authentication,
+                                                                @Parameter(description = "ID of the classroom") @PathVariable UUID classroomId) {
     var currentUserId = userService.currentUserId(authentication);
-    return ResponseEntity.ok(classRoomService.currentActivities(classroomId, currentUserId));
+    var activities = classRoomService.currentActivities(classroomId, currentUserId);
+
+
+    return ResponseEntity.ok(activities);
   }
 
   @PostMapping("/checkin")

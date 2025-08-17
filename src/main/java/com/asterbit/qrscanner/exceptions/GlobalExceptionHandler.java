@@ -1,9 +1,13 @@
 package com.asterbit.qrscanner.exceptions;
 
+import static com.asterbit.qrscanner.util.ConstMessages.ACTIVITY_NOT_FOUND;
 import static com.asterbit.qrscanner.util.ConstMessages.AUTHENTICATION_FAILED;
+import static com.asterbit.qrscanner.util.ConstMessages.CHECKIN_NOT_ALLOWED;
+import static com.asterbit.qrscanner.util.ConstMessages.CLASSROOM_NOT_FOUND;
 import static com.asterbit.qrscanner.util.ConstMessages.EMAIL_ALREADY_EXISTS;
 import static com.asterbit.qrscanner.util.ConstMessages.TIMESTAMP;
 import static com.asterbit.qrscanner.util.ConstMessages.UNEXPECTED_ERROR;
+import static com.asterbit.qrscanner.util.ConstMessages.USER_ALREADY_CHECKED_IN;
 import static com.asterbit.qrscanner.util.ConstMessages.USER_NOT_FOUND;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -82,6 +86,60 @@ public class GlobalExceptionHandler {
     var problem = ProblemDetail.forStatusAndDetail(BAD_REQUEST, ex.getMessage());
     problem.setTitle(EMAIL_ALREADY_EXISTS);
     problem.setProperty(TIMESTAMP, LocalDateTime.now());
+    return problem;
+  }
+
+  @ExceptionHandler(AlreadyCheckedInException.class)
+  public ProblemDetail handleAlreadyCheckedInException(AlreadyCheckedInException ex) {
+    log.warn("User already checked in to activity {}", ex.getActivityId());
+
+    var problem = ProblemDetail.forStatusAndDetail(BAD_REQUEST, ex.getMessage());
+    problem.setTitle(USER_ALREADY_CHECKED_IN);
+    problem.setProperty(TIMESTAMP, LocalDateTime.now());
+    problem.setProperty("activityId", ex.getActivityId());
+    return problem;
+  }
+
+  @ExceptionHandler(ActivityNotFoundException.class)
+  public ProblemDetail handleActivityNotFoundException(ActivityNotFoundException ex) {
+    log.warn("Activity not found with id  {}", ex.getActivityId());
+
+    var problem = ProblemDetail.forStatusAndDetail(NOT_FOUND, ex.getMessage());
+    problem.setTitle(ACTIVITY_NOT_FOUND);
+    problem.setProperty(TIMESTAMP, LocalDateTime.now());
+    problem.setProperty("activityId", ex.getActivityId());
+    return problem;
+  }
+
+  @ExceptionHandler(UserNotFoundException.class)
+  public ProblemDetail handleUserNotFoundException(UserNotFoundException ex) {
+    log.warn("User not found with id {}", ex.getUserId());
+
+    var problem = ProblemDetail.forStatusAndDetail(NOT_FOUND, ex.getMessage());
+    problem.setTitle(USER_NOT_FOUND);
+    problem.setProperty(TIMESTAMP, LocalDateTime.now());
+    problem.setProperty("userId", ex.getUserId());
+    return problem;
+  }
+
+  @ExceptionHandler(ClassroomNotFoundException.class)
+  public ProblemDetail handleClassroomNotFoundException(ClassroomNotFoundException ex) {
+    log.warn("Classroom not found with id {}", ex.getClassroomId());
+
+    var problem = ProblemDetail.forStatusAndDetail(NOT_FOUND, ex.getMessage());
+    problem.setTitle(CLASSROOM_NOT_FOUND);
+    problem.setProperty(TIMESTAMP, LocalDateTime.now());
+    problem.setProperty("classroomId", ex.getClassroomId());
+    return problem;
+  }
+  @ExceptionHandler(CheckInNotAllowedException.class)
+  public ProblemDetail handleCheckInNotAllowedException(CheckInNotAllowedException ex) {
+    log.warn("Check-in attempt after allowed time: {}", ex.getLatestAllowed());
+
+    var problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
+    problem.setTitle(CHECKIN_NOT_ALLOWED);
+    problem.setProperty(TIMESTAMP, LocalDateTime.now());
+    problem.setProperty("latestAllowed", ex.getLatestAllowed());
     return problem;
   }
 

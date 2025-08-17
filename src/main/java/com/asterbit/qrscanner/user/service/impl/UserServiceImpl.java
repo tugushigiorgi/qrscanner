@@ -4,8 +4,10 @@ import static com.asterbit.qrscanner.util.ConstMessages.AUTHENTICATION_INVALID;
 import static com.asterbit.qrscanner.util.ConstMessages.EMAIL_ALREADY_EXISTS;
 import static com.asterbit.qrscanner.util.ConstMessages.INVALID_EMAIL_OR_PASSWORD;
 import static com.asterbit.qrscanner.util.ConstMessages.USER_NOT_FOUND_WITH_EMAIL;
+import static com.asterbit.qrscanner.util.ConstMessages.USER_WITH_ID_NOT_FOUND;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
+import com.asterbit.qrscanner.checkins.CheckInRepository;
 import com.asterbit.qrscanner.exceptions.EmailAlreadyExistsException;
 import com.asterbit.qrscanner.exceptions.InvalidCredentialsException;
 import com.asterbit.qrscanner.security.JwtFactory;
@@ -20,6 +22,7 @@ import com.asterbit.qrscanner.user.service.UserService;
 import java.util.HashSet;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Var;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,6 +42,7 @@ public class UserServiceImpl implements UserService {
   private final JwtFactory jwtFactory;
   private final PasswordEncoder passwordEncoder;
   private final UserMapper userMapper;
+  private final CheckInRepository checkInRepository;
 
   @Transactional(readOnly = true)
   @Override
@@ -89,4 +93,16 @@ public class UserServiceImpl implements UserService {
         ));
   }
 
+  @Override
+  @Transactional(readOnly = true)
+  public Boolean isCheckedIn(UUID userId, UUID activityId) {
+    return checkInRepository.existsByUserAndActivity(userId,activityId);
+  }
+
+  @Override
+  public User findById(UUID userId) {
+    return userRepository.findById(userId)
+        .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST));
+
+  }
 }

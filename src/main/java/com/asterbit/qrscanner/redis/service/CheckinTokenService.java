@@ -1,7 +1,6 @@
 package com.asterbit.qrscanner.redis.service;
 
 import com.asterbit.qrscanner.redis.CheckInToken;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface CheckinTokenService {
