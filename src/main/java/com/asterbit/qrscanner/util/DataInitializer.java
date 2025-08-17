@@ -28,7 +28,7 @@ public class DataInitializer implements CommandLineRunner {
   @Transactional
   @Override
   public void run(String... args) throws Exception {
-
+    System.out.println("aw");
 //    var user =User.builder()
 //        .email("test@gmail.com")
 //        .firstName("test")
