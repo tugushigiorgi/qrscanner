@@ -90,7 +90,7 @@ class UserServiceImplTest {
 
   @Test
   void login_userNotFound() {
-    var loginDto = new LoginDto("missing@example.com", "password");
+    var loginDto = new LoginDto("fake@gmail.com", "password");
 
     when(userRepository.findByEmail(loginDto.getEmail())).thenReturn(Optional.empty());
 
@@ -113,7 +113,6 @@ class UserServiceImplTest {
         .hasMessageContaining(INVALID_EMAIL_OR_PASSWORD);
   }
 
-  // ===== REGISTER SUCCESS =====
   @Test
   void registerUser_success() {
     var dto = RegisterUserDto.builder()
@@ -172,11 +171,11 @@ class UserServiceImplTest {
   @Test
   void currentUserId_userNotFound() {
     Authentication auth = mock(Authentication.class);
-    when(auth.getName()).thenReturn("missing@example.com");
-    when(userRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
+    when(auth.getName()).thenReturn("fake@gmail.com");
+    when(userRepository.findByEmail("fake@gmail.com")).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> userService.currentUserId(auth))
         .isInstanceOf(ResponseStatusException.class)
-        .hasMessageContaining(String.format(USER_NOT_FOUND_WITH_EMAIL, "missing@example.com"));
+        .hasMessageContaining(String.format(USER_NOT_FOUND_WITH_EMAIL, "fake@gmail.com"));
   }
 }
