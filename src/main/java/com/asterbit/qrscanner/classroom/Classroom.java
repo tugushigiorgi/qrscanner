@@ -45,5 +45,4 @@ public class Classroom {
   public void addActivity(Activity activity) {
     activities.add(activity);
   }
-
 }

@@ -132,6 +132,7 @@ public class GlobalExceptionHandler {
     problem.setProperty("classroomId", ex.getClassroomId());
     return problem;
   }
+
   @ExceptionHandler(CheckInNotAllowedException.class)
   public ProblemDetail handleCheckInNotAllowedException(CheckInNotAllowedException ex) {
     log.warn("Check-in attempt after allowed time: {}", ex.getLatestAllowed());

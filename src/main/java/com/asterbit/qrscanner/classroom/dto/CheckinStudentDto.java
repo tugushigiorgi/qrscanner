@@ -1,6 +1,5 @@
 package com.asterbit.qrscanner.classroom.dto;
 
-
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
